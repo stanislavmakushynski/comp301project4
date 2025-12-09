@@ -24,11 +24,9 @@
       ; ###### you need to extend the environment with count 
       ; ###### variable so that it could be manipulated and
       ; ###### increased later on.
-      ; #####################################################    
-
-
-
-    
+      ; #####################################################
+      (extend-env
+       'count (num-val 0)
       ; #####################################################
        
        (extend-env
@@ -37,7 +35,7 @@
         'v (num-val 5)
         (extend-env
          'x (num-val 10)
-         (empty-env))))))
+         (empty-env)))))))
 
 ;;;;;;;;;;;;;;;; environment constructors and observers ;;;;;;;;;;;;;;;;
 
