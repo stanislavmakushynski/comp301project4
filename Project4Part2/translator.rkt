@@ -40,22 +40,66 @@
         (var-exp (var)
          ; ################################################
          ; ############ implement translation of var-exp here
-         ; ################################################  
-                 
+         ; ################################################
+                 (let ((var-occurrence (apply-senv-number senv var)))
+                   (var-exp
+                    (string->symbol
+                     (string-append
+                      (symbol->string var)
+                      (number->string var-occurrence)))))
          )
         
         (let-exp (var exp1 body)
-          ; ################################################
-          ; ############ implement translation of let-exp here
-          ; ################################################
-                 
-         )
+                 ; ################################################
+                 ; ############ implement translation of let-exp here
+                 ; ################################################
+                 (let ((var-occurrence (apply-senv-number senv var)))
+                   (let ((new-var (string->symbol
+                                   (string-append
+                                    (symbol->string var)
+                                    (number->string (+ var-occurrence 1))
+                                    (if (> var-occurrence 0)
+                                        (string-append
+                                         " "
+                                         (symbol->string var)
+                                         " has been reinitialized. "
+                                         (symbol->string var)
+                                         (number->string (+ var-occurrence 1))
+                                         " is created and shadows "
+                                         (symbol->string var)
+                                         (number->string var-occurrence)
+                                         ".")
+                                        "")))))
+                     (let-exp
+                      new-var
+                      (translation-of exp1 senv)
+                      (translation-of body
+                                      (extend-senv var senv)))))
+                 )
         
         (proc-exp (var body)
          ; ################################################
          ; ############ implement translation of proc-exp here
          ; ################################################  
-                  
+                  (let ((var-occurrence (apply-senv-number senv var)))
+                    (let ((new-var (string->symbol
+                                   (string-append
+                                    (symbol->string var)
+                                    (number->string (+ var-occurrence 1))
+                                    (if (> var-occurrence 0)
+                                        (string-append
+                                         " "
+                                         (symbol->string var)
+                                         " has been reinitialized. "
+                                         (symbol->string var)
+                                         (number->string (+ var-occurrence 1))
+                                         " is created and shadows "
+                                         (symbol->string var)
+                                         (number->string var-occurrence)
+                                         ".")
+                                        "")))))
+                      (proc-exp new-var
+                                (translation-of body (extend-senv var senv)))))
          )
         
         (call-exp (rator rand)
@@ -93,7 +137,13 @@
   ; ###### the environment and finds the occurences of variable
   ; ###### var in the environment senv
   ; ###########################################################
-  
+    (lambda (senv var)
+      (cond
+        ((null? senv) 0)
+        ((eqv? var (car senv))
+         (+ 1 (apply-senv-number (cdr senv) var)))
+        (else
+          (apply-senv-number (cdr senv) var))))
    )
   
   ;; apply-senv : Senv * Var -> Lexaddr
